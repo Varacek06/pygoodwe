@@ -1,7 +1,7 @@
 """ pygoodwe: a (terrible) interface to the goodwe solar API """
 
 
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 import json
 import logging
 import os
@@ -112,60 +112,60 @@ class API:
     # stub function names to old names
     getCurrentReadings = get_current_readings
 
-    # def getDayReadings(self, date):
-    #     date_s = date.strftime('%Y-%m-%d')
-    #     payload = {
-    #         'powerStationId' : self.system_id
-    #     }
-    #     data = self.call("v2/PowerStation/GetMonitorDetailByPowerstationId", payload)
-    #     if 'info' not in data:
-    #     logging.warning(date_s + " - Received bad data " + str(data))
-    #         return result
-    #     result = {
-    #         'latitude' : data['info'].get('latitude'),
-    #         'longitude' : data['info'].get('longitude'),
-    #         'entries' : []
-    #     }
-    #     payload = {
-    #         'powerstation_id' : self.system_id,
-    #         'count' : 1,
-    #         'date' : date_s
-    #     }
-    #     data = self.call("PowerStationMonitor/GetPowerStationPowerAndIncomeByDay", payload)
-    #     if len(data) == 0:
-    #         logging.warning(date_s + " - Received bad data " + str(data))
-    #         return result
-    #     eday_kwh = data[0]['p']
-    #     payload = {
-    #         'id' : self.system_id,
-    #         'date' : date_s
-    #     }
-    #     data = self.call("PowerStationMonitor/GetPowerStationPacByDayForApp", payload)
-    #     if 'pacs' not in data:
-    #         logging.warning(date_s + " - Received bad data " + str(data))
-    #         return result
-    #     minutes = 0
-    #     eday_from_power = 0
-    #     for sample in data['pacs']:
-    #         parsed_date = datetime.strptime(sample['date'], "%m/%d/%Y %H:%M:%S")
-    #         next_minutes = parsed_date.hour * 60 + parsed_date.minute
-    #         sample['minutes'] = next_minutes - minutes
-    #         minutes = next_minutes
-    #         eday_from_power += sample['pac'] * sample['minutes']
-    #     factor = eday_kwh / eday_from_power if eday_from_power > 0 else 1
-    #     eday_kwh = 0
-    #     for sample in data['pacs']:
-    #         date += timedelta(minutes=sample['minutes'])
-    #         pgrid_w = sample['pac']
-    #         increase = pgrid_w * sample['minutes'] * factor
-    #         if increase > 0:
-    #             eday_kwh += increase
-    #             result['entries'].append({
-    #                 'dt' : date,
-    #                 'pgrid_w': pgrid_w,
-    #                 'eday_kwh': round(eday_kwh, 3)
-    #             })
-    #     return result
+    def getDayReadings(self, date):
+        date_s = date.strftime('%Y-%m-%d')
+        payload = {
+            'powerStationId' : self.system_id
+        }
+        data = self.call("v2/PowerStation/GetMonitorDetailByPowerstationId", payload)
+        if 'info' not in data:
+            logging.warning(date_s + " - Received bad data " + str(data))
+            return result
+        result = {
+            'latitude' : data['info'].get('latitude'),
+            'longitude' : data['info'].get('longitude'),
+            'entries' : []
+        }
+        payload = {
+            'powerstation_id' : self.system_id,
+            'count' : 1,
+            'date' : date_s
+        }
+        data = self.call("PowerStationMonitor/GetPowerStationPowerAndIncomeByDay", payload)
+        if len(data) == 0:
+            logging.warning(date_s + " - Received bad data " + str(data))
+            return result
+        eday_kwh = data[0]['p']
+        payload = {
+            'id' : self.system_id,
+            'date' : date_s
+        }
+        data = self.call("PowerStationMonitor/GetPowerStationPacByDayForApp", payload)
+        if 'pacs' not in data:
+            logging.warning(date_s + " - Received bad data " + str(data))
+            return result
+        minutes = 0
+        eday_from_power = 0
+        for sample in data['pacs']:
+            parsed_date = datetime.strptime(sample['date'], "%m/%d/%Y %H:%M:%S")
+            next_minutes = parsed_date.hour * 60 + parsed_date.minute
+            sample['minutes'] = next_minutes - minutes
+            minutes = next_minutes
+            eday_from_power += sample['pac'] * sample['minutes']
+        factor = eday_kwh / eday_from_power if eday_from_power > 0 else 1
+        eday_kwh = 0
+        for sample in data['pacs']:
+            date += timedelta(minutes=sample['minutes'])
+            pgrid_w = sample['pac']
+            increase = pgrid_w * sample['minutes'] * factor
+            if increase > 0:
+                eday_kwh += increase
+                result['entries'].append({
+                    'dt' : date,
+                    'pgrid_w': pgrid_w,
+                    'eday_kwh': round(eday_kwh, 3)
+                })
+        return result
 
     @property
     def headers(self) -> Dict[str, str]:
