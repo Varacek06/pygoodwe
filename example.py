@@ -1,12 +1,7 @@
-""" example script showing how you can run things"""
-
 from datetime import date, timedelta
 import json
 from functools import lru_cache
-
-# copy config.py.example to config.py and fill in your details
 from config import args
-
 from pygoodwe import API, SingleInverter
 
 @lru_cache()

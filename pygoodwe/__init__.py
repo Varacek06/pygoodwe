@@ -12,6 +12,7 @@ from typing import Any, Dict, List, Optional, Union
 
 import requests
 from requests.sessions import Session
+import logging
 
 __version__ = "0.0.17"
 
@@ -45,10 +46,7 @@ class API:
         # TODO: lang: Real Soon Now it'll filter out any responses without that language
 
         if log_level is None:
-            if "LOG_LEVEL" in os.environ:
-                log_level = os.environ["LOG_LEVEL"]
-            else:
-                log_level = "INFO"
+            log_level = os.environ.get("LOG_LEVEL", "INFO")
 
         if log_level in ("DEBUG", "INFO", "WARNING"):
             log_level = getattr(logging, os.getenv("LOG_LEVEL", "INFO"))
