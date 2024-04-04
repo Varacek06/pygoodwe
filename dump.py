@@ -13,8 +13,12 @@ def main() -> None:
         password=args.get("gw_password", "thiswillnotwork"),
     )
     goodwe.getCurrentReadings()
-    print(json.dumps(goodwe.data, indent=4))
-
+    # print(json.dumps(goodwe.data, indent=4))
+    with open('/Users/macbook/programovanicko/pygoodwe/data.json', 'w') as file:
+        file.truncate(0)  # Delete all text in the file
+        file.write(json.dumps(goodwe.data, indent=4))
+        print("Data dumped to data.json")
+        file.close()
 
 if __name__ == "__main__":
     main()
