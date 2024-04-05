@@ -119,7 +119,7 @@ class API:
         }
         data = self.call("v2/PowerStation/GetMonitorDetailByPowerstationId", payload)
         if 'info' not in data:
-            logging.warning(date_s + " - Received bad data " + str(data))
+            result = logging.warning(date_s + " - Received bad data " + str(data))  # Initialize the "result" variable
             return result
         result = {
             'latitude' : data['info'].get('latitude'),
@@ -135,7 +135,7 @@ class API:
         if len(data) == 0:
             logging.warning(date_s + " - Received bad data " + str(data))
             return result
-        eday_kwh = data[0]['p']
+        eday_kwh = data[0]['p'] # type: ignore
         payload = {
             'id' : self.system_id,
             'date' : date_s
@@ -187,7 +187,7 @@ class API:
         possible args:
         - filename: the path where to write the output file, default "./Plant_Power_{datestr}.xls
         """
-        datestr = datetime.strftime(export_date, "%Y-%m-%d")
+        datestr = datetime.strftime(datetime.combine(export_date, datetime.min.time()), "%Y-%m-%d")
         if filename is None:
             filename = f"Plant_Power_{datestr}.xls"
         logging.debug("Will write data for %s to file: %s", datestr, filename)
